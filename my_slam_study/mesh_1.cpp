@@ -154,9 +154,19 @@ double triangle(float a_x,float a_y,float a_z,float b_x ,float b_y,float b_z,flo
     return (sqrt(a*a+b*b+c*c))/2;
 }
 
-double triangle_volume()
+double triangle_volume(double a_x,double a_y,double a_z,double b_x,double b_y,double b_z,double c_x,double c_y,double c_z,double d_x,double d_y,double d_z)
 {
-
+    float X1=a_x-b_x;
+    float Y1=a_y-b_y;
+    float Z1=a_z-b_z;
+    float X2=a_x-c_x;
+    float Y2=a_y-c_y;
+    float Z2=a_z-c_z;
+    float X3=a_x-d_x;
+    float Y3=a_y-d_y;
+    float Z3=a_z-d_z;
+    double volume= (X1*Y2*Z3-X1*Z2*Y3-Y1*X2*Z3+Y1*Z2*X3+Z1*X2*Y3-Z1*Y2*X3)/6;    
+    return abs(volume);
 }
 double mesh_surface_area()
 {
@@ -183,8 +193,10 @@ double  mesh_volume()
     int symbol=0;
     double one_minz=0;
     double one_maxz=0;
-    int new_x1;int new_y1;int new_z1;
-    int new_x2;int new_y2;int new_z2;
+    double total_volume=0;
+    double new_x1;double new_y1;double new_z1;
+    double new_x2;double new_y2;double new_z2;
+    double x;double y;double z;
     for(int i=0;i< my_mesh.size();i++)  
     {
         float a_x=my_mesh[i].point_index.point1.num_x;
@@ -212,49 +224,42 @@ double  mesh_volume()
         one_minz=a_z;one_maxz=a_z;
         if (b_z<one_minz) one_minz=b_z; else if (c_z<one_minz) one_minz=c_z;
         if (b_z>one_maxz) one_maxz=b_z; else if (c_z>one_maxz) one_maxz=c_z;
-        new_z1=one_minz;new_z2=one_minz;
+    
         if  (a_z==one_minz)
         {
-            new_x1=b_x;new_y1=b_y;new_x2=c_x,new_y2=c_y;
+            x=a_x;y=a_y;z=a_z;
+            new_x1=b_x;new_y1=b_y;new_z1=b_z;new_x2=c_x,new_y2=c_y;new_z2=c_z;
         }
         else if(b_z==one_minz)
         {
-            new_x1=a_x;new_y1=a_y;new_x2=c_x,new_y2=c_y;
+             x=b_x;y=b_y;z=b_z;
+            new_x1=a_x;new_y1=a_y;new_z1=a_z;new_x2=c_x,new_y2=c_y;new_z2=c_z;
         }
         else if (c_z==one_minz)
         {
-            new_x1=a_x;new_y1=a_y;new_x2=b_x,new_y2=b_y;
+             x=c_x;y=c_y;z=c_z;
+            new_x1=a_x;new_y1=a_y;new_z1=a_z;new_x2=b_x,new_y2=b_y;new_z2=b_z;
         }
         
-        
-        // if (a_z==one_maxz)
-        // {
-        //     new_x=a_x;new_y=a_y;
-        // }
-        // else if(b_z==one_maxz)
-        // {
-        //     new_x=b_x;new_y=b_y;
-        // }
-        // else if (c_z==one_maxz)
-        // {
-        //     new_x=c_x;new_y=c_y;
-        // }
 
         float volume_1=(one_minz-z_min)*triangle(a_x,a_y,0,b_x,b_y,0,c_x,c_y,0);
-        float volume_2=triangle_volume()
-        
+        float volume_2=triangle_volume(x,y,z,new_x1,new_y1,one_minz,new_x1,new_y1,new_z1,new_x2,new_y2,one_minz);
+        float volume_3=triangle_volume(x,y,z,new_x1,new_y1,new_z1,new_x2,new_y2,new_z2,new_x2,new_y2,one_minz);
+        float volume=volume_1+volume_2+volume_3;
+        total_volume=total_volume+symbol*volume;
     }
-
+    return total_volume;
     
 }
 
 int main()
 {
-   int res =read_stl("data/狼人头像 半身雕塑_ascii.stl");
-   if (res<0) cout<<"read worried"<<endl;
+   int res =read_stl("data/extrude_ascii.stl");
+   if (res<0) cout<<"read worried"<<endl; 
    double min_z=find_min_z();
     double my_mesh_area=mesh_surface_area();
-    cout<<my_mesh_area<<endl;
-    cout<<"min_z is  "<<min_z<<endl;
+    double my_mesh_volume=mesh_volume();
+    cout<<"my_mesh_area=  "<<my_mesh_area<<endl;
+    cout<<"my_mash_volume=  "<<my_mesh_volume<<endl;
     return 0;
 } 
